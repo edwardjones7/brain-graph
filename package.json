@@ -1,0 +1,15 @@
+{
+  "name": "brain-graph",
+  "version": "0.1.0",
+  "description": "Turn any Obsidian vault into a living 3D brain.",
+  "type": "module",
+  "bin": { "brain-graph": "bin/brain-graph.mjs" },
+  "files": ["bin", "src", "web"],
+  "scripts": {
+    "demo": "node bin/brain-graph.mjs example-vault",
+    "test": "node --test"
+  },
+  "engines": { "node": ">=20" },
+  "keywords": ["obsidian", "graph", "visualization", "second-brain", "canvas"],
+  "license": "MIT"
+}

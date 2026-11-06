@@ -1,0 +1,54 @@
+#graph-wrap { position: relative; height: calc(100dvh - var(--nav-h) - env(safe-area-inset-bottom) - env(safe-area-inset-top) - 150px); min-height: 360px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); overflow: hidden; touch-action: none; }
+#graph { display: block; width: 100%; height: 100%; touch-action: none; cursor: grab; -webkit-user-select: none; user-select: none; }
+.g-top { position: absolute; top: 8px; left: 8px; right: 8px; display: flex; gap: 6px; z-index: 3; }
+.g-top input {
+  flex: 1; min-width: 0; min-height: 42px; border: 1px solid var(--border); border-radius: 12px; padding: 0 12px; font-size: var(--fs-main, 16px); outline: none;
+  background: color-mix(in srgb, var(--surface) 88%, transparent); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
+}
+.g-top input:focus { border-color: var(--accent); }
+.g-btn {
+  flex: none; min-width: 42px; min-height: 42px; border: 1px solid var(--border); border-radius: 12px; color: var(--text-2); text-decoration: none;
+  background: color-mix(in srgb, var(--surface) 88%, transparent); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
+  display: inline-flex; align-items: center; justify-content: center; font-size: var(--fs-sub, 18px); line-height: 1; padding: 0;
+}
+.g-btn svg, .ico { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+.g-btn[aria-pressed="true"] { background: var(--accent-soft); color: var(--accent-ink); border-color: transparent; }
+.g-sugg, .g-panel { position: absolute; z-index: 4; background: var(--surface); border: 1px solid var(--border); border-radius: 14px; box-shadow: 0 8px 28px rgba(0,0,0,.18); overflow: auto; }
+.g-sugg { top: 56px; left: 8px; right: 8px; max-height: 55%; padding: 4px; }
+.g-sugg button { display: flex; width: 100%; gap: 10px; align-items: center; text-align: left; border: 0; background: none; min-height: 44px; padding: 0 10px; border-radius: 10px; }
+.g-sugg button:hover, .g-sugg button:focus { background: var(--surface-2); outline: none; }
+.g-panel { top: 56px; right: 8px; width: min(310px, calc(100% - 16px)); max-height: calc(100% - 66px); padding: 12px 14px; }
+.g-sub { font-size: var(--fs-sec, 13px); font-weight: 600; margin: 2px 0 8px; }
+.g-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
+.g-chip { min-height: 34px; border-radius: 999px; border: 1px solid var(--border); background: var(--surface-2); padding: 0 11px; font-size: var(--fs-sec, 13px); font-weight: 600; display: inline-flex; gap: 7px; align-items: center; }
+.g-chip[aria-pressed="false"] { opacity: .45; }
+.g-chip[aria-pressed="false"] .lbl { text-decoration: line-through; }
+.sw { width: 10px; height: 10px; border-radius: 50%; flex: none; display: inline-block; }
+.g-row { display: flex; align-items: center; justify-content: space-between; min-height: 44px; font-size: var(--fs-main, 14px); gap: 10px; border-top: 1px solid var(--border); }
+.g-row input[type="checkbox"] { width: 20px; height: 20px; accent-color: var(--accent); }
+.g-row input[type="range"] { width: 120px; accent-color: var(--accent); }
+.g-card { position: absolute; left: 8px; right: 8px; bottom: 8px; z-index: 3; background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 10px 10px 10px 14px; box-shadow: 0 6px 24px rgba(0,0,0,.14); display: flex; gap: 8px; align-items: center; }
+.g-card .t { font-weight: 700; }
+.g-status { position: absolute; left: 12px; bottom: 10px; font-size: var(--fs-sec, 11.5px); color: var(--text-3); pointer-events: none; z-index: 1; }
+.g-card:not([hidden]) ~ .g-status { display: none; }
+#graph-wrap { background: radial-gradient(120% 90% at 50% 42%, var(--brain-bg-2) 0%, var(--brain-bg) 68%); border: 1px solid var(--brain-line); border-radius: 20px; color: var(--brain-ink); }
+.g-top { top: 10px; left: 10px; right: 10px; gap: 6px; }
+.g-top input { flex: 1 1 auto; max-width: 300px; min-height: 36px; border-radius: 999px; padding: 0 14px; font-size: var(--fs-main, 14px); background: rgba(255, 255, 255, .06); border: 1px solid var(--brain-line); color: var(--brain-ink); }
+.g-top input::placeholder { color: var(--brain-faint); }
+#g-names { margin-left: auto; }
+#graph-wrap .g-btn { min-width: 36px; min-height: 36px; border-radius: 999px; background: rgba(255, 255, 255, .06); border-color: var(--brain-line); color: var(--brain-ink); }
+#graph-wrap .g-btn svg { width: 16px; height: 16px; }
+#graph-wrap .g-btn[aria-pressed="true"] { background: rgba(217, 178, 102, .26); color: var(--brain-ink); }
+@media (pointer: coarse) { .g-top input { min-height: 40px; font-size: 16px; } #graph-wrap .g-btn { min-width: 40px; min-height: 40px; } }
+#graph-wrap .g-sugg, #graph-wrap .g-panel, #graph-wrap .g-card { background: rgba(24, 20, 15, .92); border-color: var(--brain-line); color: var(--brain-ink); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); box-shadow: 0 12px 40px rgba(0, 0, 0, .45); border-radius: 14px; }
+#graph-wrap .g-sugg { top: 54px; }
+#graph-wrap .g-panel { top: 54px; }
+#graph-wrap .faint, #graph-wrap .cnt, #graph-wrap .g-sub, #graph-wrap .empty { color: var(--brain-faint); }
+#graph-wrap .g-chip { background: rgba(255, 255, 255, .06); border-color: var(--brain-line); color: var(--brain-ink); }
+#graph-wrap .g-row { border-top-color: var(--brain-line); }
+#graph-wrap .g-sugg button:hover, #graph-wrap .g-sugg button:focus { background: rgba(255, 255, 255, .08); }
+#graph-wrap mark { background: rgba(217, 178, 102, .35); color: inherit; }
+#graph-wrap .g-card { left: 10px; right: 10px; bottom: 10px; }
+#graph-wrap .g-card .btn.primary { background: var(--brain-accent); color: var(--brain-bg); }
+@media (min-width: 640px) { #graph-wrap .g-card { right: auto; width: 360px; } }
+.g-status { color: var(--brain-faint); left: 16px; bottom: 12px; font-size: var(--fs-sec, 12px); }

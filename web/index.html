@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Brain graph</title>
+<style>
+:root {
+  --brain-bg: #0a0907; --brain-bg-2: #1e1912; --brain-ink: #f0e9dc; --brain-faint: #a59a86; --brain-accent: #d9b266; --brain-line: rgba(240, 233, 220, .14);
+  --font: -apple-system, BlinkMacSystemFont, "Segoe UI Variable Text", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --surface: #18140f; --surface-2: #231d15; --border: var(--brain-line); --text-2: var(--brain-ink); --text-3: var(--brain-faint);
+  --accent: var(--brain-accent); --accent-soft: rgba(217, 178, 102, .26); --accent-ink: var(--brain-ink); --radius: 0;
+}
+* { box-sizing: border-box; }
+html, body { height: 100%; margin: 0; background: var(--brain-bg); color: var(--brain-ink); font-family: var(--font); overflow: hidden; }
+button, input { font: inherit; color: inherit; }
+button { cursor: pointer; }
+[hidden] { display: none !important; }
+.faint { color: var(--brain-faint); }
+.ellipsis { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.grow { flex: 1; min-width: 0; }
+.cnt { font-size: 12px; }
+.empty { font-size: 14px; }
+.btn { display: inline-flex; align-items: center; min-height: 36px; padding: 0 14px; border-radius: 999px; font-size: 14px; font-weight: 600; text-decoration: none; flex: none; }
+/*CSS*/
+#graph-wrap { position: fixed; inset: 0; height: auto; min-height: 0; border: 0; border-radius: 0; }
+</style>
+</head>
+<body>
+<div id="graph-wrap">
+  <canvas id="graph" aria-label="3D brain of the vault: notes and the links between them"></canvas>
+  <div class="g-top">
+    <input id="g-find" type="search" placeholder="Find a note…" aria-label="Find a note in the graph" autocomplete="off" enterkeyhint="go">
+    <button class="g-btn" id="g-names" aria-pressed="true" aria-label="Show note names" title="Show note names"><svg viewBox="0 0 24 24"><path d="M5 7V5h14v2M12 5v14M9 19h6"/></svg></button>
+    <button class="g-btn" id="g-filter-btn" aria-pressed="false" aria-label="Filters"><svg viewBox="0 0 24 24"><path d="M4 6h16M7 12h10M10 18h4"/></svg></button>
+    <button class="g-btn" id="g-fit" aria-label="Reset the view"><svg viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button>
+  </div>
+  <div class="g-sugg" id="g-sugg" hidden></div>
+  <div class="g-panel" id="g-panel" hidden></div>
+  <div class="g-card" id="g-card" hidden></div>
+  <div class="g-status" id="g-status"></div>
+</div>
+<script>window.BRAIN = /*DATA*/;</script>
+<script>/*JS*/</script>
+</body>
+</html>
