@@ -4,7 +4,9 @@ An always-on personal agent that lives in your notes.
 
 KeepOS runs Claude Code headless inside an Obsidian vault, on your own machine, and you talk to it from Telegram. The vault is its memory: it reads your notes before it answers and writes to them before it finishes, so everything it knows is a markdown file you can open, read and fix. It messages you on a schedule, hands work to specialist agents that keep their own memory, and, when a website wants a human, sends you a link to take over its browser from your phone.
 
-This is the open core of the agent I run every day. It's two parts:
+> **This is the open-source version of Rook**, the personal agent I run every day on my own server. Rook does more than what's here, with more specialists, more tools and a full dashboard. This repo is the core it's built on, without my personal data, and you can run it yourself. How Rook works and what it does day to day: **[Meet Rook, my personal AI agent](https://elenos.ai/blog/rook-personal-ai-agent/)**.
+
+It's two parts:
 
 | Folder | What |
 | --- | --- |
@@ -66,4 +68,4 @@ You need Node 22+ and [Claude Code](https://docs.claude.com/en/docs/claude-code)
 
 MIT.
 
-Built by [Edward Jones](https://github.com/edwardjones7) · [Elenos](https://elenos.ai).
+Built by [Edward Jones](https://github.com/edwardjones7) · [Elenos](https://elenos.ai) · [The Rook write-up](https://elenos.ai/blog/rook-personal-ai-agent/).

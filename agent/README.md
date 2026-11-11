@@ -1,6 +1,6 @@
 # KeepOS agent
 
-An always-on personal agent: Claude Code running headless inside your Obsidian vault, reachable from Telegram. See the [top-level README](../README.md) for the design.
+An always-on personal agent: Claude Code running headless inside your Obsidian vault, reachable from Telegram. It's the open-source version of [Rook](https://elenos.ai/blog/rook-personal-ai-agent/), the agent I run every day. See the [top-level README](../README.md) for the design.
 
 ## Setup
 
