@@ -59,10 +59,10 @@ And the handoff: the agent hit a reCAPTCHA (Google's public demo page), and this
 The private version I run is about 18,000 lines on the same core: 10 specialists, 9 custom MCP tool servers, 16 scheduled jobs and 99 tests. None of the following is in this repo:
 
 - **Job search.** A specialist that scans new-grad job boards and company career pages every day, ranks postings against my résumé, writes a tailored application packet for strong fits, and submits an application only after I approve that exact posting. Captchas and logins come to my phone through the live browser handoff, which *is* in this repo.
-- **Email, calendar and school.** Mailboxes over IMAP (it reads and drafts but never sends), my calendar, and coursework from Canvas and a homework platform. All read-only.
+- **Email, calendar and school.** My mailboxes over IMAP: it reads and drafts, and an email goes out only after I tap Send in Telegram or the dashboard. My calendar and coursework from Canvas and a homework platform, read-only.
 - **Money.** My investment portfolio through SnapTrade, read-only, plus market news.
 - **Content.** A pipeline that plans posts, renders carousel slides and publishes to Instagram, only after I approve each card.
-- **Business lead research.** Finds and qualifies local businesses from free public sources, for my agency's outreach team of specialists.
+- **Lead research.** Finds and qualifies businesses from free public sources, for sales outreach.
 - **Triggers and follow-ups.** It reacts to new email and calendar events, and follows up on things I said I'd do.
 - **Voice.** Talk to it from a Siri shortcut or a Telegram voice note, and it answers out loud.
 - **It edits its own code.** From Telegram, Rook can change its own codebase in a separate git worktree, typecheck it, and ship it to the server after a PIN.
