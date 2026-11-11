@@ -54,6 +54,19 @@ And the handoff: the agent hit a reCAPTCHA (Google's public demo page), and this
 
 <p align="center"><img src="docs/live-handoff.png" alt="The /live page on a phone: 'Your agent needs you, reCAPTCHA on the sign-up form, 4:29 left', the agent's browser tab with the captcha, and a Done button" width="300"></p>
 
+## The full setup
+
+My own Rook also has a dashboard: one chat shared with Telegram, the day's tasks, the specialist team and the vault as a brain. The dashboard isn't in this repo yet. These are screenshots of it, run against a sample vault with made-up data.
+
+<p align="center"><img src="docs/dashboard-chat.jpg" alt="Dashboard chat: Rook answering 'what's on my plate today?' with three priorities, and relaying a specialist's hosting comparison" width="900"></p>
+
+| | |
+| --- | --- |
+| ![Home: today's open tasks from the Daily note, with how long each has been carried over](docs/dashboard-home.jpg) | ![Agents: Rook with four specialists, each with its own memory and last run](docs/dashboard-agents.jpg) |
+| **Home.** Today's open tasks, read from the Daily note. | **Agents.** The specialist team, each with its own memory. |
+| ![Brain: the vault as a 3D brain graph](docs/dashboard-brain.jpg) | |
+| **Brain.** The vault as a graph ([`brain-graph/`](brain-graph/)). | |
+
 ## Design decisions
 
 **Claude Code is the runtime.** There's no agent framework here. `claude -p --output-format stream-json` already has the loop, the tools, subagents, MCP and permission modes, and it runs on a Claude subscription instead of per-token API billing. The service around it is under 2,000 lines, the /live page included: process management, memory, scheduling and a phone interface.
