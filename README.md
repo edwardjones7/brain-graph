@@ -1,65 +1,69 @@
-# brain-graph
+# KeepOS
 
-Turn any Obsidian vault into a living 3D brain.
+An always-on personal agent that lives in your notes.
 
-![A brain-shaped 3D graph of notes and links](docs/preview.jpg)
+KeepOS runs Claude Code headless inside an Obsidian vault, on your own machine, and you talk to it from Telegram. The vault is its memory: it reads your notes before it answers and writes to them before it finishes, so everything it knows is a markdown file you can open, read and fix. It messages you on a schedule, hands work to specialist agents that keep their own memory, and, when a website wants a human, sends you a link to take over its browser from your phone.
 
-Your notes become glowing nodes. Your links become arcs through the white matter. Signals travel along the links, and the notes they reach flare. Drag to turn it, scroll to zoom, click a note to send a ripple through its neighbours.
+This is the open core of the agent I run every day. It's two parts:
 
-This is the graph from [KeepOS](https://elenos.ai/blog/rook-personal-ai-agent/), the personal agent system I'm building. I got asked for the theme enough times that I pulled it out.
-
-## Run it
-
-You need Node 20 or newer. Nothing else: no dependencies, no build step, no account.
-
-```bash
-git clone https://github.com/edwardjones7/brain-graph.git
-cd brain-graph
-node bin/brain-graph.mjs "/path/to/your/vault"
-```
-
-No vault yet? Try the sample:
-
-```bash
-npm run demo
-```
-
-## Options
-
-| Flag | What it does |
+| Folder | What |
 | --- | --- |
-| `--out brain.html` | Writes one standalone HTML file instead of starting a server |
-| `--anonymous` | Strips every note and folder name |
-| `--port 4173` | Sets the local port |
-| `--no-open` | Doesn't open the browser |
+| [`agent/`](agent/) | The agent: Telegram bot, headless Claude Code runner, conversations that file themselves into the vault, scheduled jobs, specialist agents and the live browser handoff. |
+| [`brain-graph/`](brain-graph/) | Turn any Obsidian vault into a living 3D brain. Zero dependencies. |
 
-## Sharing yours
-
-A normal export contains your note names. Before you post one anywhere, use `--anonymous`:
-
-```bash
-node bin/brain-graph.mjs "/path/to/your/vault" --anonymous --out brain.html
-```
-
-That keeps the shape, the links and the colours, and drops the names.
-
-Your notes stay on your machine. The tool scans your notes for links and keeps only file names and links, and the server only listens on localhost.
-
-## What you get
-
-- **Your Obsidian colours.** Simple `path:` colour groups in `.obsidian/graph.json` carry over. Without them, each top-level folder gets its own colour.
-- **Obsidian's link rules.** Wikilinks, aliases, frontmatter links and unresolved links all work.
-- **Search, filters and a local graph.** Find a note, hide groups, or focus on one note's neighbourhood.
-- **Open in Obsidian.** Double-click a note, or press Open on its card.
+![A brain-shaped 3D graph of notes and links](brain-graph/docs/preview.jpg)
 
 ## How it works
 
-A force layout decides which notes sit together. That flat map then gets folded over a cortex, so linked notes stay neighbours on the surface while the whole thing reads as an organ instead of a hairball.
+```mermaid
+flowchart LR
+  phone([Telegram]) -->|message| bot[Bot<br/>owner only]
+  cron([Schedules<br/>jobs/*.md]) --> queue
+  bot --> queue[Run queue<br/>one at a time]
+  queue --> pull[git pull vault]
+  pull --> claude["claude -p<br/>stream-json"]
+  claude <-->|read / write| vault[(Obsidian vault<br/>IDENTITY · SOUL · USER<br/>Agents/*)]
+  claude -->|Agent tool| spec[Specialists<br/>own prompt + Memory.md]
+  claude -->|MCP| browser[Live Chromium]
+  browser -.->|captcha / login| handoff[need_human]
+  handoff -.->|link| phone
+  claude --> commit[git commit + push]
+  claude -->|reply / progress| bot
+```
 
-The fine dust is decoration. It's a fixed cloud that gives the brain its shape however few notes you have, tinted by the nearest note's group. It's all plain canvas, in `web/graph.js`.
+Every message and every scheduled job becomes one headless Claude Code run inside the vault. The service pulls the vault first, streams the run's tool calls to Telegram as live status lines ("reading Projects/Trip.md"), and commits whatever the run wrote. Runs go through a single queue, because every run touches the same files and the same git repo.
+
+## Design decisions
+
+**Claude Code is the runtime.** There's no agent framework here. `claude -p --output-format stream-json` already has the loop, the tools, subagents, MCP and permission modes, and it runs on a Claude subscription instead of per-token API billing. The service around it is under 2,000 lines, the /live page included: process management, memory, scheduling and a phone interface.
+
+**The vault is the memory, not the chat log.** A conversation is a resumed Claude session while it's active. After a few idle hours it gets one last "wrap-up" turn that files every durable fact, decision and commitment into the right note, then it's retired. The next conversation starts small and reads what it needs. There's no vector database: the agent searches the notes with Grep and Glob, like you would.
+
+**Personality is a file, read fresh every run.** `IDENTITY.md`, `SOUL.md` and `USER.md` are injected as the system prompt on every run, so editing one in Obsidian changes the next reply, and the core instructions never get buried under a long conversation. Anything that changes between runs (the time, recent notes) goes in the message instead, so the system prompt stays byte-identical and the prompt cache holds.
+
+**Specialists are notes too.** `Agents/<Name>/<Name>.md` defines a specialist: a description that tells the main agent when to hand off, a model, an optional tool allowlist, and a personality. Each keeps its own `Memory.md`, which it's instructed to update before every run ends. Teams nest (`parent: Lead`), and an agent that reads untrusted web pages can be cut off from the vault entirely (`vault: false`).
+
+**Proactive, but quiet.** Jobs are markdown files with a cron schedule. A job that finds nothing worth your attention answers `NOTHING_TO_SEND` and no message goes out. That rule is what keeps a proactive agent from turning into noise.
+
+**Humans for what humans are for.** When the browser hits a captcha, a login or a verification code, the agent doesn't try to get around it. It calls `need_human`, you get a Telegram link, and the page shows its live tab (a DevTools screencast) that you drive with taps and typing. You press Done and it carries on. Logins persist in the browser profile, so it asks once per site.
+
+**One owner, least privilege.** The bot answers one Telegram user and ignores everyone else. The default permission mode lets the agent write notes but limits the shell to read-only commands. The `/live` page needs a random secret from the link and should be bound to a private address such as a Tailscale IP.
+
+## Get started
+
+```bash
+git clone https://github.com/edwardjones7/keepos.git
+cd keepos/agent
+npm install
+cp .env.example .env   # add your Telegram bot token and user id
+npm run ask -- "what's in this vault?"   # one turn from the terminal, against the example vault
+npm start              # the bot, schedules and all
+```
+
+You need Node 22+ and [Claude Code](https://docs.claude.com/en/docs/claude-code) installed and logged in. The full setup is in [`agent/README.md`](agent/README.md).
 
 ## License
 
-MIT. Use it, change it, ship it.
+MIT.
 
-Built by [Elenos](https://elenos.ai).
+Built by [Edward Jones](https://github.com/edwardjones7) · [Elenos](https://elenos.ai).

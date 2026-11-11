@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#131110">
+<title>Live browser</title>
+<style>
+/* Stone neutrals and one bronze accent, light and dark. */
+:root {
+  --bg: #f0efeb; --surface: #fbfaf7; --surface-2: #e9e7e1; --border: #dbd8d0;
+  --text: #1e1b16; --text-2: #5a5347; --text-3: #766d60;
+  --accent: #8a6414; --accent-ink: #6e4e0c; --accent-soft: #f0e7d2; --on-accent: #ffffff;
+  --good: #1f9d57; --critical-ink: #b0302a;
+  --font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --display: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #131110; --surface: #1b1815; --surface-2: #25211c; --border: #342f28;
+    --text: #efe9df; --text-2: #bfb5a6; --text-3: #91877a;
+    --accent: #d4a955; --accent-ink: #e8c67f; --accent-soft: #2e2618; --on-accent: #1a1408;
+    --good: #3fbf74; --critical-ink: #ff9d95;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #131110; --surface: #1b1815; --surface-2: #25211c; --border: #342f28;
+  --text: #efe9df; --text-2: #bfb5a6; --text-3: #91877a;
+  --accent: #d4a955; --accent-ink: #e8c67f; --accent-soft: #2e2618; --on-accent: #1a1408;
+  --good: #3fbf74; --critical-ink: #ff9d95;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body { margin: 0; background: var(--bg); color: var(--text); font: 15px/1.4 var(--font); display: flex; flex-direction: column; }
+header { padding: max(12px, env(safe-area-inset-top)) 16px 10px; border-bottom: 1px solid var(--border); background: var(--surface); }
+h1 { margin: 0; font: 600 19px/1.2 var(--display); }
+.why { margin-top: 4px; color: var(--text-2); }
+.why b { color: var(--text); font-weight: 600; }
+.clock { font-variant-numeric: tabular-nums; color: var(--accent-ink); }
+.row { display: flex; gap: 8px; align-items: center; }
+.row.tabs { margin-top: 8px; }
+select, input[type=text], input[type=password], input[type=url] {
+  flex: 1; min-width: 0; font: inherit; color: var(--text); background: var(--surface-2);
+  border: 1px solid var(--border); border-radius: 10px; padding: 9px 11px;
+}
+button { font: inherit; color: var(--text); background: var(--surface-2); border: 1px solid var(--border); border-radius: 10px; padding: 9px 12px; cursor: pointer; white-space: nowrap; }
+button:active { transform: translateY(1px); }
+button.primary { background: var(--accent); color: var(--on-accent); border-color: transparent; font-weight: 600; }
+main { flex: 1; overflow: auto; touch-action: pan-x pan-y; background: var(--surface-2); position: relative; }
+#screen { display: block; width: 100%; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
+.empty { padding: 40px 20px; text-align: center; color: var(--text-3); }
+footer { padding: 10px 16px max(10px, env(safe-area-inset-bottom)); border-top: 1px solid var(--border); background: var(--surface); display: grid; gap: 8px; }
+.keys { display: flex; gap: 6px; overflow-x: auto; }
+.keys button { padding: 8px 11px; }
+#done { width: 100%; padding: 13px; font-size: 16px; }
+.flash { position: fixed; left: 50%; bottom: 120px; transform: translateX(-50%); background: var(--text); color: var(--bg); padding: 8px 14px; border-radius: 99px; font-size: 14px; opacity: 0; transition: opacity .2s; pointer-events: none; }
+.flash.on { opacity: .92; }
+[hidden] { display: none !important; }
+</style>
+</head>
+<body>
+
+<div id="app" style="display:contents">
+  <header>
+    <h1 id="title">Live browser</h1>
+    <div class="why" id="why"></div>
+    <div class="row tabs" id="tabRow" hidden><select id="tabs" aria-label="Tab"></select></div>
+  </header>
+  <main id="main">
+    <img id="screen" alt="The agent's browser tab" hidden draggable="false">
+    <div class="empty" id="empty">Connecting…</div>
+  </main>
+  <footer>
+    <div class="row">
+      <input id="text" type="text" placeholder="Type into the focused field" autocomplete="off" autocapitalize="off" spellcheck="false">
+      <button id="send">Type</button>
+    </div>
+    <div class="keys">
+      <button data-key="Enter">Enter</button>
+      <button data-key="Backspace">⌫</button>
+      <button data-key="Tab">Tab</button>
+      <button data-scroll="-600">▲ Scroll</button>
+      <button data-scroll="600">▼ Scroll</button>
+      <button id="zoom">Zoom 1×</button>
+      <button id="back">Back</button>
+      <button id="go">Open URL</button>
+    </div>
+    <button class="primary" id="done" hidden>Done, hand it back</button>
+  </footer>
+</div>
+
+<div class="flash" id="flash"></div>
+
+<script>
+const $ = (id) => document.getElementById(id);
+let tab = "", stream, handoff = null, zoom = 1, poll;
+// The secret comes in the link. Keep it for this tab, then drop it from the address bar.
+let token = new URLSearchParams(location.search).get("t") || "";
+try { token = token || sessionStorage.getItem("live-token") || ""; sessionStorage.setItem("live-token", token); } catch {}
+history.replaceState(null, "", "/live");
+
+async function api(path, body) {
+  const res = await fetch(path, { method: body ? "POST" : "GET", headers: { "X-Live-Token": token, ...(body ? { "Content-Type": "application/json" } : {}) }, body: body ? JSON.stringify(body) : undefined });
+  if (res.status === 401) { clearInterval(poll); stream?.close(); $("empty").textContent = "This link isn't valid. Open the latest one from Telegram."; throw new Error("locked"); }
+  const j = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(j.error || res.statusText);
+  return j;
+}
+
+function flash(msg) {
+  const f = $("flash"); f.textContent = msg; f.classList.add("on");
+  clearTimeout(flash.t); flash.t = setTimeout(() => f.classList.remove("on"), 1600);
+}
+
+function render(state) {
+  handoff = state.handoff;
+  $("title").textContent = handoff ? "Your agent needs you" : "Live browser";
+  $("done").hidden = !handoff;
+  if (handoff) {
+    const left = Math.max(0, Math.round((handoff.until - Date.now()) / 1000));
+    $("why").innerHTML = "";
+    const b = document.createElement("b"); b.textContent = handoff.reason;
+    const c = document.createElement("span"); c.className = "clock"; c.textContent = ` · ${Math.floor(left / 60)}:${String(left % 60).padStart(2, "0")} left`;
+    $("why").append(b, c);
+  } else {
+    $("why").textContent = "Nobody's waiting on you. You can still look around, or sign in to a site ahead of time.";
+  }
+  const tabs = state.tabs || [];
+  $("tabRow").hidden = tabs.length < 2;
+  const sel = $("tabs");
+  const opts = tabs.map((t) => `${t.id}\n${t.title || t.url}`).join("|");
+  if (sel.dataset.opts !== opts) {
+    sel.dataset.opts = opts;
+    sel.innerHTML = "";
+    for (const t of tabs) { const o = document.createElement("option"); o.value = t.id; o.textContent = t.title || t.url; sel.append(o); }
+  }
+  if (!tabs.some((t) => t.id === tab)) open(tabs[0]?.id || "");
+  sel.value = tab;
+}
+
+function open(id) {
+  tab = id;
+  stream?.close();
+  stream = undefined;
+  if (!id) { $("screen").hidden = true; $("empty").hidden = false; $("empty").textContent = "No tabs are open."; return; }
+  stream = new EventSource(`/live/stream?tab=${encodeURIComponent(id)}&t=${encodeURIComponent(token)}`);
+  stream.onmessage = (e) => {
+    const f = JSON.parse(e.data);
+    $("screen").src = `data:image/jpeg;base64,${f.img}`;
+    $("screen").hidden = false; $("empty").hidden = true;
+  };
+  stream.onerror = () => { stream?.close(); stream = undefined; setTimeout(() => { if (tab === id) open(id); }, 2000); };
+}
+$("tabs").onchange = (e) => open(e.target.value);
+
+async function refresh() { try { render(await api("/api/live")); } catch (e) { if (e.message !== "locked") $("empty").textContent = e.message; } }
+
+async function drive(input) {
+  if (!tab) return;
+  try { await api("/api/live/input", { tab, ...input }); } catch (e) { flash(e.message); }
+}
+
+// A tap is a pointer that comes up where it went down. Dragging is left to the browser, which pans
+// the zoomed screenshot (and cancels the pointer, so no stray click).
+let down;
+$("screen").addEventListener("pointerdown", (e) => { down = { x: e.clientX, y: e.clientY }; });
+$("screen").addEventListener("pointercancel", () => { down = undefined; });
+$("screen").addEventListener("pointerup", (e) => {
+  if (!down || Math.hypot(e.clientX - down.x, e.clientY - down.y) > 8) return (down = undefined);
+  down = undefined;
+  const r = $("screen").getBoundingClientRect();
+  drive({ type: "tap", x: (e.clientX - r.left) / r.width, y: (e.clientY - r.top) / r.height });
+});
+$("screen").addEventListener("wheel", (e) => {
+  e.preventDefault();
+  const r = $("screen").getBoundingClientRect();
+  drive({ type: "scroll", x: (e.clientX - r.left) / r.width, y: (e.clientY - r.top) / r.height, dy: e.deltaY });
+}, { passive: false });
+
+$("send").onclick = async () => {
+  const t = $("text").value;
+  if (!t) return;
+  await drive({ type: "text", text: t });
+  $("text").value = "";
+  flash("Typed");
+};
+$("text").onkeydown = (e) => { if (e.key === "Enter") $("send").click(); };
+for (const b of document.querySelectorAll("[data-key]")) b.onclick = () => drive({ type: "key", key: b.dataset.key });
+for (const b of document.querySelectorAll("[data-scroll]")) b.onclick = () => drive({ type: "scroll", x: 0.5, y: 0.5, dy: Number(b.dataset.scroll) });
+$("back").onclick = () => drive({ type: "back" });
+$("go").onclick = () => {
+  const u = prompt("Open which link?", "https://");
+  if (u && /^https:\/\//i.test(u)) drive({ type: "goto", url: u });
+};
+function setZoom(z) {
+  zoom = z;
+  $("screen").style.width = `${zoom * 100}%`;
+  $("zoom").textContent = `Zoom ${zoom}×`;
+}
+$("zoom").onclick = () => setZoom(zoom >= 3 ? 1 : zoom + 1);
+// The tab is a desktop-sized page, so on a phone a captcha box is too small to hit at 1×.
+setZoom(innerWidth < 700 ? 2 : 1);
+$("done").onclick = async () => {
+  const r = await api("/api/live/done", { note: "" }).catch((e) => ({ error: e.message }));
+  flash(r.ok ? "Handed back" : r.error || "Nobody was waiting anymore");
+  refresh();
+};
+
+function start() {
+  refresh();
+  clearInterval(poll);
+  poll = setInterval(refresh, 1000);
+}
+start();
+</script>
+</body>
+</html>

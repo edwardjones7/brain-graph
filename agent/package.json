@@ -1,0 +1,26 @@
+{
+  "name": "keepos-agent",
+  "version": "0.1.0",
+  "private": true,
+  "description": "An always-on personal agent: Claude Code running headless in your Obsidian vault, reachable from Telegram.",
+  "type": "module",
+  "scripts": {
+    "start": "tsx --env-file-if-exists=.env src/index.ts",
+    "ask": "tsx --env-file-if-exists=.env src/ask.ts",
+    "job": "tsx --env-file-if-exists=.env src/run-job.ts",
+    "typecheck": "tsc --noEmit",
+    "test": "node --import tsx --test \"test/*.test.ts\""
+  },
+  "engines": { "node": ">=22" },
+  "dependencies": {
+    "@playwright/mcp": "0.0.83",
+    "grammy": "^1.46.0",
+    "node-cron": "^4.6.0"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.6",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2"
+  },
+  "license": "MIT"
+}
