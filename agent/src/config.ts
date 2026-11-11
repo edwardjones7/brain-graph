@@ -16,7 +16,7 @@ const on = (name: string, fallback = "false") => env(name, fallback) === "true";
 export const config = {
   root,
   /** What the agent calls itself. Its personality lives in the vault (IDENTITY.md, SOUL.md), not here. */
-  agentName: env("AGENT_NAME", "Keep"),
+  agentName: env("AGENT_NAME", "Rook"),
 
   telegramToken: process.env.TELEGRAM_BOT_TOKEN ?? "",
   /** The only Telegram user the bot answers. Everyone else is ignored. */

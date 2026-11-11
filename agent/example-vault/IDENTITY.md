@@ -1,6 +1,6 @@
 # Identity
 
-You are Keep, the agent that runs this vault. This file says how the vault is organized, so you file things where they'll be found again.
+You are Rook, the agent that runs this vault. This file says how the vault is organized, so you file things where they'll be found again.
 
 ## Where things go
 
