@@ -6,7 +6,7 @@ An always-on personal agent that lives in your notes.
 
 KeepOS runs Claude Code headless inside an Obsidian vault, on your own machine, and you talk to it from Telegram. The vault is its memory: it reads your notes before it answers and writes to them before it finishes, so everything it knows is a markdown file you can open, read and fix. It messages you on a schedule, hands work to specialist agents that keep their own memory, and, when a website wants a human, sends you a link to take over its browser from your phone.
 
-> **This is the open-source version of what runs Rook**, the personal agent I use every day on my own server. Rook is the main agent; KeepOS is everything packaged around it: the runtime, memory, specialists, jobs, browser and graph. My own setup does more than what's here, with more specialists, more tools and a full dashboard. This repo is the core it's built on, without my personal data, and you can run it yourself. How Rook works and what it does day to day is in **[the write-up on the Elenos blog](https://elenos.ai/blog/rook-personal-ai-agent/)**.
+> **This is an open-source version, so not everything is in here.** Rook is the main agent I run every day on my own server, and KeepOS is everything packaged around it: the runtime, memory, specialists, jobs, browser and graph. This repo is the core that the full system is built on, without my personal data and private integrations, and you can run it yourself. What the full version adds is listed under [The full version](#the-full-version). How Rook works and what it does day to day is in **[the write-up on the Elenos blog](https://elenos.ai/blog/rook-personal-ai-agent/)**.
 
 It's two parts:
 
@@ -54,9 +54,21 @@ And the handoff: the agent hit a reCAPTCHA (Google's public demo page), and this
 
 <p align="center"><img src="docs/live-handoff.png" alt="The /live page on a phone: 'Your agent needs you, reCAPTCHA on the sign-up form, 4:29 left', the agent's browser tab with the captcha, and a Done button" width="300"></p>
 
-## The full setup
+## The full version
 
-My own Rook also has a dashboard: one chat shared with Telegram, the day's tasks, the specialist team and the vault as a brain. The dashboard isn't in this repo yet. These are screenshots of it, run against a sample vault with made-up data.
+The private version I run is about 18,000 lines on the same core: 10 specialists, 9 custom MCP tool servers, 16 scheduled jobs and 99 tests. None of the following is in this repo:
+
+- **Job search.** A specialist that scans new-grad job boards and company career pages every day, ranks postings against my résumé, writes a tailored application packet for strong fits, and submits an application only after I approve that exact posting. Captchas and logins come to my phone through the live browser handoff, which *is* in this repo.
+- **Email, calendar and school.** Mailboxes over IMAP (it reads and drafts but never sends), my calendar, and coursework from Canvas and a homework platform. All read-only.
+- **Money.** My investment portfolio through SnapTrade, read-only, plus market news.
+- **Content.** A pipeline that plans posts, renders carousel slides and publishes to Instagram, only after I approve each card.
+- **Business lead research.** Finds and qualifies local businesses from free public sources, for my agency's outreach team of specialists.
+- **Triggers and follow-ups.** It reacts to new email and calendar events, and follows up on things I said I'd do.
+- **Voice.** Talk to it from a Siri shortcut or a Telegram voice note, and it answers out loud.
+- **It edits its own code.** From Telegram, Rook can change its own codebase in a separate git worktree, typecheck it, and ship it to the server after a PIN.
+- **The dashboard.** An installable web app: one chat shared with Telegram, the day's tasks, each specialist's workspace, the job pipeline, the vault as a brain, activity and system health.
+
+These are screenshots of that dashboard, run against a sample vault with made-up data.
 
 <p align="center"><img src="docs/dashboard-chat.jpg" alt="Dashboard chat: Rook answering 'what's on my plate today?' with three priorities, and relaying a specialist's hosting comparison" width="900"></p>
 
